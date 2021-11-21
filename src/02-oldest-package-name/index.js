@@ -28,8 +28,40 @@ The results should have this structure:
  *  the "name" of the package that has the oldest "date" value
  */
 
+const fetch = require('node-fetch');
+
 module.exports = async function oldestPackageName() {
   // TODO
+  const response = await fetch(
+    'http://ambush-api.inyourarea.co.uk/ambush/intercept',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: 'https://api.npms.io/v2/search/suggestions?q=react',
+        method: 'GET',
+        return_payload: true,
+      }),
+    },
+  );
+  let packages = await response.json();
+  packages = packages.content;
 
-  return name
+  let arr = [];
+
+  for (const x of packages) {
+    arr.push(x.package.date);
+  }
+
+  var orderedDates = arr.sort(function (a, b) {
+    return Date.parse(a) - Date.parse(b);
+  });
+
+  for (const y of packages) {
+    if (y.package.date === orderedDates[0]) {
+      name = y.package.name;
+    }
+  }
+
+  return name;
 };

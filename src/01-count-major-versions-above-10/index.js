@@ -28,9 +28,39 @@ The results should have this structure:
  *  the number of packages that have a MAJOR semver version 
  *  greater than 10.x.x
  */
+ 
+const fetch = require('node-fetch');
 
 module.exports = async function countMajorVersionsAbove10() {
-  // TODO
+  const response = await fetch(
+    'http://ambush-api.inyourarea.co.uk/ambush/intercept',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: 'https://api.npms.io/v2/search/suggestions?q=react',
+        method: 'GET',
+        return_payload: true,
+      }),
+    },
+  );
+  let packages = await response.json();
+  packages = packages.content;
 
-  return count
+  let arr = [];
+
+  for (const x of packages) {
+    arr.push(x.package.version);
+  }
+
+  const newArr = [];
+  for (let versions of arr) {
+    versions = versions.slice(0, 2);
+    versions = parseInt(versions);
+    if (versions > 10) newArr.push(versions);
+  }
+
+  count = newArr.length;
+
+  return count;
 };
